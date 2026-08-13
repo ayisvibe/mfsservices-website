@@ -21,10 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
     navToggle.addEventListener("click", () => {
       const open = navList.classList.toggle("open");
 
-      navToggle.setAttribute(
-        "aria-expanded",
-        open
-      );
+     navToggle.setAttribute(
+  "aria-expanded",
+  String(open)
+);
     });
 
     navLinks.forEach((link) => {
@@ -415,10 +415,12 @@ ${message}`
       )
     );
 
-    const material =
-      new THREE.PointsMaterial({
-        size: 2
-      });
+   const material =
+  new THREE.PointsMaterial({
+    size: 2,
+    transparent: true,
+    opacity: 0.4
+  });
 
     const particles =
       new THREE.Points(
