@@ -40,11 +40,5 @@ Files included:
 
 ## License
 You may use and adapt this code for your business. No external paid libraries are required.
-
 ---
 
-If you want, I can:
-- Add a GitHub Pages ready repo (create branch and files),
-- Replace the map placeholder with an embeddable Google Maps iframe (if you provide the exact address or coordinates),
-- Add contact form backend using a serverless form endpoint or instructions for Netlify Forms / Formspree.
-Tell me which option you prefer and I'll proceed.
