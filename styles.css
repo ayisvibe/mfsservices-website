@@ -52,6 +52,14 @@ body{
 }
 
 /* Header */
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:rgba(255,255,255,.95);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(11,95,90,.05);
+}
 .header-inner{
   display:flex;
   align-items:center;
