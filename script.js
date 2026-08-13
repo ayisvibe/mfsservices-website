@@ -1,127 +1,468 @@
-// Basic interactivity: nav toggle, animated reveal, carousel, contact form handling, modal
-document.addEventListener('DOMContentLoaded', () => {
-  // Set year
-  document.getElementById('year').textContent = new Date().getFullYear();
+document.addEventListener("DOMContentLoaded", () => {
+  /* =========================
+     Footer year
+  ========================= */
 
-  // Navigation toggle for mobile
-  const navToggle = document.querySelector('.nav-toggle');
-  const navList = document.getElementById('nav-list');
-  if (navToggle) {
-    navToggle.addEventListener('click', () => {
-      const open = navList.classList.toggle('open');
-      navToggle.setAttribute('aria-expanded', String(open));
+  const year = document.getElementById("year");
+
+  if (year) {
+    year.textContent = new Date().getFullYear();
+  }
+
+  /* =========================
+     Mobile navigation
+  ========================= */
+
+  const navToggle = document.querySelector(".nav-toggle");
+  const navList = document.getElementById("nav-list");
+  const navLinks = document.querySelectorAll(".nav-list a");
+
+  if (navToggle && navList) {
+    navToggle.addEventListener("click", () => {
+      const open = navList.classList.toggle("open");
+
+      navToggle.setAttribute(
+        "aria-expanded",
+        open
+      );
+    });
+
+    navLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        navList.classList.remove("open");
+        navToggle.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+      });
     });
   }
 
-  // Animated reveal for why-cards using IntersectionObserver
-  const observer = new IntersectionObserver((entries) => {
-    for (const e of entries) {
-      if (e.isIntersecting) {
-        e.target.classList.add('in-view');
-        observer.unobserve(e.target);
+  /* =========================
+     Scroll animations
+  ========================= */
+
+  const animatedElements =
+    document.querySelectorAll("[data-animate]");
+
+  if (
+    "IntersectionObserver" in window &&
+    animatedElements.length
+  ) {
+    const observer =
+      new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add(
+                "in-view"
+              );
+
+              observer.unobserve(
+                entry.target
+              );
+            }
+          });
+        },
+        {
+          threshold: 0.15
+        }
+      );
+
+    animatedElements.forEach((item) =>
+      observer.observe(item)
+    );
+  }
+
+  /* =========================
+     Testimonial carousel
+  ========================= */
+
+  const track =
+    document.querySelector(
+      ".carousel-track"
+    );
+
+  const prev =
+    document.querySelector(
+      ".carousel-btn.prev"
+    );
+
+  const next =
+    document.querySelector(
+      ".carousel-btn.next"
+    );
+
+  const slides = track
+    ? [...track.children]
+    : [];
+
+  let current = 0;
+  let autoSlide;
+
+  function updateCarousel() {
+    if (!track || !slides.length) {
+      return;
+    }
+
+    track.style.transform =
+      `translateX(-${current * 100}%)`;
+  }
+
+  function nextSlide() {
+    current =
+      (current + 1) %
+      slides.length;
+
+    updateCarousel();
+  }
+
+  function previousSlide() {
+    current =
+      (current - 1 + slides.length) %
+      slides.length;
+
+    updateCarousel();
+  }
+
+  if (next) {
+    next.addEventListener(
+      "click",
+      nextSlide
+    );
+  }
+
+  if (prev) {
+    prev.addEventListener(
+      "click",
+      previousSlide
+    );
+  }
+
+  if (slides.length > 1) {
+    autoSlide = setInterval(
+      nextSlide,
+      6000
+    );
+
+    track.addEventListener(
+      "mouseenter",
+      () => clearInterval(autoSlide)
+    );
+
+    track.addEventListener(
+      "mouseleave",
+      () => {
+        autoSlide = setInterval(
+          nextSlide,
+          6000
+        );
+      }
+    );
+  }
+
+  /* =========================
+     Contact form
+  ========================= */
+
+  const form =
+    document.getElementById(
+      "contactForm"
+    );
+
+  const status =
+    document.getElementById(
+      "formStatus"
+    );
+
+  if (form && status) {
+    form.addEventListener(
+      "submit",
+      (event) => {
+        event.preventDefault();
+
+        const data =
+          new FormData(form);
+
+        const name =
+          data.get("name");
+
+        const email =
+          data.get("email");
+
+        const message =
+          data.get("message");
+
+        if (
+          !name ||
+          !email ||
+          !message
+        ) {
+          status.textContent =
+            "Please complete all required fields.";
+
+          return;
+        }
+
+        const subject =
+          encodeURIComponent(
+            "MFS Services enquiry from website"
+          );
+
+        const body =
+          encodeURIComponent(
+            `Name: ${name}
+
+Email: ${email}
+
+Phone: ${
+              data.get(
+                "phone"
+              ) || "N/A"
+            }
+
+Message:
+
+${message}`
+          );
+
+        status.textContent =
+          "Preparing your message...";
+
+        setTimeout(() => {
+          window.location.href =
+            `mailto:clientservices@mfsservicesng.com?subject=${subject}&body=${body}`;
+
+          status.textContent =
+            "If your email application didn't open, please contact us directly.";
+
+          form.reset();
+        }, 500);
+      }
+    );
+  }
+
+  /* =========================
+     WhatsApp modal
+  ========================= */
+
+  const waBtn =
+    document.getElementById(
+      "whatsappBtn"
+    );
+
+  const modal =
+    document.getElementById(
+      "waModal"
+    );
+
+  const closeBtn =
+    document.querySelector(
+      ".modal-close"
+    );
+
+  const copyBtn =
+    document.getElementById(
+      "copyWa"
+    );
+
+  function openModal() {
+    if (!modal) return;
+
+    modal.setAttribute(
+      "aria-hidden",
+      "false"
+    );
+
+    closeBtn?.focus();
+  }
+
+  function closeModal() {
+    if (!modal) return;
+
+    modal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    waBtn?.focus();
+  }
+
+  waBtn?.addEventListener(
+    "click",
+    openModal
+  );
+
+  closeBtn?.addEventListener(
+    "click",
+    closeModal
+  );
+
+  modal?.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target === modal
+      ) {
+        closeModal();
       }
     }
-  }, {threshold: 0.18});
+  );
 
-  document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
-
-  // Simple accessible carousel
-  const track = document.querySelector('.carousel-track');
-  const prevBtn = document.querySelector('.carousel-btn.prev');
-  const nextBtn = document.querySelector('.carousel-btn.next');
-  let index = 0;
-  const items = track ? Array.from(track.children) : [];
-  const total = items.length;
-
-  function showIndex(i) {
-    if (!track) return;
-    index = (i + total) % total;
-    const width = track.clientWidth; // container width
-    track.style.transform = `translateX(-${index * width}px)`;
-    // update aria attributes if needed
-  }
-
-  if (prevBtn) prevBtn.addEventListener('click', () => showIndex(index - 1));
-  if (nextBtn) nextBtn.addEventListener('click', () => showIndex(index + 1));
-
-  // Handle resize to keep slide widths correct
-  window.addEventListener('resize', () => showIndex(index));
-
-  // Auto-advance carousel every 6s
-  let auto = setInterval(() => showIndex(index + 1), 6000);
-  [prevBtn, nextBtn, track].forEach(el => {
-    if (el) el.addEventListener('mouseenter', () => clearInterval(auto));
-    if (el) el.addEventListener('mouseleave', () => auto = setInterval(() => showIndex(index + 1), 6000));
-  });
-
-  // Contact form handling (client-side): validate and show success message.
-  const form = document.getElementById('contactForm');
-  const status = document.getElementById('formStatus');
-
-  if (form) {
-    form.addEventListener('submit', (ev) => {
-      ev.preventDefault();
-      const data = new FormData(form);
-      // Basic validation (HTML5 handles required fields)
-      const name = data.get('name');
-      const email = data.get('email');
-      const message = data.get('message');
-      if (!name || !email || !message) {
-        status.textContent = 'Please complete the required fields.';
-        return;
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key === "Escape"
+      ) {
+        closeModal();
       }
-
-      // Since there's no backend, we compose a mailto as fallback and show success UI.
-      const subject = encodeURIComponent('MFS Services enquiry from website');
-      const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nPhone: ${data.get('phone') || 'N/A'}\n\nMessage:\n${message}`);
-      const mailto = `mailto:clientservices@mfsservicesng.com?subject=${subject}&body=${body}`;
-
-      status.textContent = 'Preparing your message...';
-      // Open user's email client as graceful degradation:
-      setTimeout(() => {
-        window.location.href = mailto;
-        status.textContent = 'If your mail client did not open, please email clientservices@mfsservicesng.com or try again.';
-        form.reset();
-      }, 600);
-    });
-  }
-
-  // WhatsApp modal
-  const waBtn = document.getElementById('whatsappBtn');
-  const waModal = document.getElementById('waModal');
-  const modalClose = document.querySelector('.modal-close');
-  const openWa = document.getElementById('openWa');
-  const copyWa = document.getElementById('copyWa');
-
-  function showModal() {
-    waModal.setAttribute('aria-hidden', 'false');
-    waModal.style.display = 'flex';
-    // trap focus ideally (simple)
-    modalClose.focus();
-  }
-  function hideModal() {
-    waModal.setAttribute('aria-hidden', 'true');
-    waModal.style.display = 'none';
-    waBtn.focus();
-  }
-
-  if (waBtn) waBtn.addEventListener('click', showModal);
-  if (modalClose) modalClose.addEventListener('click', hideModal);
-  if (waModal) waModal.addEventListener('click', (e) => { if (e.target === waModal) hideModal(); });
-  if (copyWa) copyWa.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText('+2348123456789');
-      copyWa.textContent = 'Copied!';
-      setTimeout(() => copyWa.textContent = 'Copy Number', 1500);
-    } catch {
-      copyWa.textContent = 'Copy failed';
     }
-  });
+  );
 
-  // Smooth focus-visible outlines for keyboard users
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') document.body.classList.add('user-is-tabbing');
-  }, {once:true});
+  copyBtn?.addEventListener(
+    "click",
+    async () => {
+      try {
+        await navigator.clipboard.writeText(
+          "+2348123456789"
+        );
 
-  // Performance: lazy load images (if any) and reduce reflows
+        copyBtn.textContent =
+          "Copied!";
+
+        setTimeout(() => {
+          copyBtn.textContent =
+            "Copy Number";
+        }, 1500);
+      } catch {
+        copyBtn.textContent =
+          "Copy failed";
+      }
+    }
+  );
+
+  /* =========================
+     Three.js AI background
+  ========================= */
+
+  const background =
+    document.getElementById(
+      "background-animation"
+    );
+
+  if (
+    background &&
+    window.THREE
+  ) {
+    const scene =
+      new THREE.Scene();
+
+    const camera =
+      new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth /
+          window.innerHeight,
+        0.1,
+        1000
+      );
+
+    const renderer =
+      new THREE.WebGLRenderer({
+        alpha: true
+      });
+
+    renderer.setSize(
+      window.innerWidth,
+      window.innerHeight
+    );
+
+    background.appendChild(
+      renderer.domElement
+    );
+
+    const geometry =
+      new THREE.BufferGeometry();
+
+    const vertices = [];
+
+    for (
+      let i = 0;
+      i < 1000;
+      i++
+    ) {
+      vertices.push(
+        (Math.random() - 0.5) *
+          1000
+      );
+
+      vertices.push(
+        (Math.random() - 0.5) *
+          1000
+      );
+
+      vertices.push(
+        (Math.random() - 0.5) *
+          1000
+      );
+    }
+
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(
+        vertices,
+        3
+      )
+    );
+
+    const material =
+      new THREE.PointsMaterial({
+        size: 2
+      });
+
+    const particles =
+      new THREE.Points(
+        geometry,
+        material
+      );
+
+    scene.add(particles);
+
+    camera.position.z = 300;
+
+    function animate() {
+      requestAnimationFrame(
+        animate
+      );
+
+      particles.rotation.x +=
+        0.0002;
+
+      particles.rotation.y +=
+        0.0005;
+
+      renderer.render(
+        scene,
+        camera
+      );
+    }
+
+    animate();
+
+    window.addEventListener(
+      "resize",
+      () => {
+        camera.aspect =
+          window.innerWidth /
+          window.innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+          window.innerWidth,
+          window.innerHeight
+        );
+      }
+    );
+  }
 });
